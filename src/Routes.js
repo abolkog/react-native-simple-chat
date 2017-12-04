@@ -2,6 +2,7 @@ import { StackNavigator } from 'react-navigation';
 
 import Splash from './components/Splash';
 import Login from './components/Login';
+import Chat from './components/Chat';
 
 const Routes = StackNavigator({
     Splash: {
@@ -12,6 +13,12 @@ const Routes = StackNavigator({
     },
     Login: {
         screen: Login,
+        navigationOptions: {
+            header: false
+        }
+    },
+    Chat: {
+        screen: Chat,
         navigationOptions: {
             header: false
         }

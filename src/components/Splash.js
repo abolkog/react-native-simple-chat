@@ -1,12 +1,29 @@
 //import liraries
 import React, { Component } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, AsyncStorage } from 'react-native';
+import { connect } from 'react-redux';
+import { loggedIn } from '../actions';
 
 // create a component
 class Splash extends Component {
 
     componentDidMount(){
-        this.props.navigation.navigate('Login');
+        AsyncStorage.getItem('user_info')
+            .then(user => {
+                if (user) {    
+                    const userObject = JSON.parse(user);
+                    this.props.loggedIn(userObject);
+                }else {
+                    this.props.navigation.navigate('Login');
+                }
+            });
+        
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if (nextProps.user) {
+            this.props.navigation.navigate('Chat');
+        }
     }
     
     render() {
@@ -28,5 +45,9 @@ const styles = StyleSheet.create({
     },
 });
 
-//make this component available to the app
-export default Splash;
+const mapStateToProps = state => {
+    return {
+        user: state.auth.user,
+    };
+}
+export default connect(mapStateToProps, { loggedIn })(Splash);
