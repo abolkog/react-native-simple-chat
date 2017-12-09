@@ -2,12 +2,13 @@
 import React, { Component } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Avatar } from 'react-native-elements';
+import { connect } from 'react-redux';
 
 // create a component
 class ChatItem extends Component {
 
     showAvatarOrNoT(message) {
-        if (message.author.id !== 2 ) {
+        if (message.author.id !== this.props.user.id ) {
             return (
                 <Avatar
                     source={{ uri: message.author.avatar }}
@@ -21,7 +22,7 @@ class ChatItem extends Component {
     }
     render() {
         const message = this.props.message;
-        const isMyMessage = message.author.id == 2;
+        const isMyMessage = message.author.id == this.props.user.id;
         const textContainerExtra = isMyMessage ? styles.textContainerRight : styles.textContainerLeft;
         return (
             <View style={styles.messageContainer}>
@@ -67,5 +68,10 @@ const styles = StyleSheet.create({
     }
 });
 
+const mapStateToProps = state => {
+    return {
+        user: state.auth.user
+    }
+}
 //make this component available to the app
-export default ChatItem;
+export default connect(mapStateToProps)(ChatItem);

@@ -1,9 +1,11 @@
 //import liraries
 import React, { Component } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, 
-    Platform, Keyboard,
+    Platform, Keyboard,ActivityIndicator,
     TouchableHighlight, KeyboardAvoidingView } from 'react-native';
 import { Header } from 'react-native-elements';
+import { connect } from 'react-redux';
+import { sendMessage, fetchMessges } from '../actions';
 
 import ChatItem from './ChatItem';
 
@@ -13,30 +15,12 @@ class Chat extends Component {
         super();
         this.state = {
             text: '',
-            disabled: true,
-            messages: [
-                {
-                    id: 1,
-                    text: 'Hello',
-                    avatar: 'http://abolkog.com/img/default_user.png',
-                    author: {
-                        id: 1,
-                        avatar: 'http://abolkog.com/img/default_user.png',
-                        username: 'Khalid Tany Khals'
-                    }
-                },
-                {
-                    id: 2,
-                    text: 'How are you',
-                    author: {
-                        id: 2,
-                        avatar: 'http://abolkog.com/img/default_user.png',
-                        username: 'Khalid'
-                    }
-                    
-                }
-            ]
+            disabled: true
         }
+    }
+    
+    componentDidMount() {
+        this.props.fetchMessges();
     }
 
     onTyping(text) {
@@ -53,20 +37,28 @@ class Chat extends Component {
     }
 
     onSendBtnPressed () {
-        const messages = this.state.messages;
-        const newMessage = {
-            text: this.state.text,
-            author: {
-                id: 1,
-                avatar: 'http://abolkog.com/img/default_user.png',
-                username: 'Khalid'
-            }
-        };
-
-        messages.unshift(newMessage);
-        this.setState({ messages })
+        this.props.sendMessage(this.state.text, this.props.user);
         this.textInput.clear();
         Keyboard.dismiss();
+    }
+
+    showListOrSpinner() {
+        if (this.props.fetching) {
+            return (
+                <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <ActivityIndicator size='large' />
+                </View>
+            );
+        }
+
+        return (
+            <FlatList
+                inverted
+                data={this.props.messages}
+                renderItem={this.renderChatItem}
+                keyExtractor={this.keyExtractor}
+            />
+        );
     }
 
     renderChatItem({ item }) {
@@ -86,14 +78,8 @@ class Chat extends Component {
                 <Header
                     centerComponent={{ text: 'Wanasa', style: { color: '#fff', fontSize: 20 } }}
                 />
-
-                <FlatList 
-                    inverted
-                    data={this.state.messages}
-                    renderItem={this.renderChatItem}
-                    keyExtractor={this.keyExtractor}
-                />
-
+                { this.showListOrSpinner () }
+                
                 <KeyboardAvoidingView behavior={behavior}>
                     <View style={styles.inputBar}>
                         
@@ -157,5 +143,13 @@ const styles = StyleSheet.create({
     }
 });
 
+const mapStateToProps = state => {
+    return {
+        user: state.auth.user,
+        fetching: state.chat.fetching,
+        messages: state.chat.messages
+    }
+}
+
 //make this component available to the app
-export default Chat;
+export default connect(mapStateToProps, { sendMessage, fetchMessges } )(Chat);
